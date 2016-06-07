@@ -18,6 +18,94 @@
 closure = function (formals, body, env)
     eval(call('function', as.pairlist(formals), body), env)
 
+#' Partial function application
+#'
+#' \code{partial} (and \code{p}, if shortcuts aren’t disabled) apply a function
+#' partially over some arguments.
+#'
+#' @param f a function
+#' @param ... partial arguments to the function \code{f}; these can be named or
+#' positional, but not a mix of both
+#' @return A function like \code{f}, with the provided arguments bound to
+#' \code{f}’s parameters, and having as parameters the remaining, un-specified
+#' arguments.
+#'
+#' @details
+#' \code{partial(f, ...)} will create a new function with the same semantics as
+#' \code{f}, but with some of its parameters (re-)bound to values. The resulting
+#' function is the same as the original, but its arguments are now bound to the
+#' specified default values. Named values are matched against their (full, not
+#' partial) argument names. Unnamed arguments are matched against the arguments
+#' by their position, starting at the second; the first argument remains free.
+#' To bind to the first argument, use named arguments.
+#'
+#' @note \code{partial} applies the arguments in a different order to the
+#' (somewhat misnamed) \code{\link{functional::Curry}}. See \link{Examples} for
+#' a comparison.
+#' @note \code{p} is defined as a handy shortcut for \code{partial}, since the
+#' purpose of \code{partial} is explicitly to allow concise code. The definition
+#' of this shortcut can be disabled by setting the R option
+#' \code{klmr.disable_shortcuts} to \code{TRUE}.
+#' @note \code{partial} might not work as expected with functions that access
+#' their arguments via \code{match.call()} or similar indirect methods. For
+#' instance, \code{partial(lm, data = …)(formula)} will fail because the data is
+#' not passed on to the actual model building function. The same is true for S3
+#' methods. See examples for an illustration.
+#'
+#' @examples
+#' # Use partial application to create a function which adds 5 to its argument
+#'
+#' add5 = partial(`+`, 5)
+#' # alternatively:
+#' \dontrun{add5 = p(`+`, 5)}
+#'
+#' add5(1 : 4)
+#' # [1] 6 7 8 9
+#'
+#' # `partial` works differently from `functional::Curry`:
+#'
+#' partial(`-`, 1)(10)
+#' # [1] 9
+#'
+#' \dontrun{functional::Curry(`-`, 1)(10)}
+#' # [1] -9
+#'
+#' # S3 dispatch fails:
+#'
+#' # Wrong result:
+#' partial(print, digits = 2)(1.234)
+#' # Explicitly specifying the generic method works:
+#' partial(print.default, digits = 2)(1.234)
+partial = function (f, ...) {
+    # We capture arguments unevaluated. I am not entirely sure where this would
+    # make a difference, but it’s the most conservative choice because it
+    # approximates the original call as closely as possible.
+    fixed = match.call(expand.dots = FALSE)$...
+
+    if (is.primitive(match.fun(f))) {
+        # None of what we do below works with primitives. Don’t try to be smart
+        # with primitive functions, otherwise things stop working. For instance,
+        # consider named arguments with primitives, such as `na.rm` with `sum`.
+        name = deparse(substitute(f))
+        closure(alist(... = ),
+                bquote(do.call(.Primitive(.(name)), c(list(...), .(fixed)))),
+                globalenv())
+    } else {
+        f = match.fun(f)
+        formals = formals(f)
+
+        # If positional arguments were given, fill call from left to right,
+        # after first argument.
+        bound_names = names(fixed) %||% 2 : (1 + length(fixed))
+        formals[bound_names] = fixed
+
+        closure(formals, body(f), parent.frame())
+    }
+}
+
+if (! getOption('klmr.disable_shortcuts', FALSE))
+    p = partial
+
 #' Test whether a value is “falsy”.
 #'
 #' \code{isFALSE(x)} tests whether \code{x} is a falsy value.
