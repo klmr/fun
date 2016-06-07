@@ -17,3 +17,7 @@
 #' # <environment: 0x7feec6390b8>
 closure = function (formals, body, env)
     eval(call('function', as.pairlist(formals), body), env)
+
+#' Pipe operator like in F#, Bash …
+#' @seealso \code{\link{magrittr::\%>\%}}
+`%>%` = magrittr::`%>%`
