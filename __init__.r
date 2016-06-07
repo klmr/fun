@@ -18,6 +18,34 @@
 closure = function (formals, body, env)
     eval(call('function', as.pairlist(formals), body), env)
 
+#' Test whether a value is “falsy”.
+#'
+#' \code{isFALSE(x)} tests whether \code{x} is a falsy value.
+#' @param x the object to be tested
+#' @return Returns either \code{TRUE} or \code{FALSE}, depending on whether
+#' \code{x} is falsy.
+#'
+#' @details
+#' An object is considered “falsy” when it is either the single value
+#' \code{FALSE} or no value at all, i.e. \code{NULL} / a vector of length 0.
+isFALSE = function (x)
+    identical(`attributes<-`(x, NULL), FALSE) || length(x) == 0
+
+#' Fall back to an alternative value if none given
+#'
+#' \code{a \%||\% b} evaluates to \code{a} unless \code{a} is falsy, in which
+#' case it evaluates to \code{b}.
+#' @param value the value
+#' @param alternative an alternative value
+#' @return Returns \code{value}, unless it isn’t a value, or \code{FALSE}, in
+#' which case \code{alternative} is returned.
+#' @seealso isFALSE
+`%||%` = function (value, alternative)
+    if(isFALSE(value)) alternative else value
+
+# FIXME: Add vectorized variant `%|%`, and `%or%`, which also handles empty
+# strings and errors.
+
 #' Compose functions \code{g} and \code{f}.
 #'
 #' @param g a function taking as its argument the return value from \code{f}
