@@ -87,6 +87,6 @@ mapply(x ~ y -> x + y, 1 : 4, 5 : 8)
 * `x ~ y -> expr` is equivalent to `function (x, y) expr`. An arbitrary number
   of arguments is supported.
 
-**Note:** Importing this module changes the semantics of `<-` (since `<-` and
+**Note:** Importing this submodule changes the semantics of `<-` (since `<-` and
 `->` refer to the same operator in R). Consequently, this module can only be
 used in code that uses `=` for assignment.
