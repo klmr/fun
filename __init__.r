@@ -82,6 +82,9 @@ partial = function (f, ...) {
     # approximates the original call as closely as possible.
     fixed = match.call(expand.dots = FALSE)$...
 
+    # FIXME: Never sets first parameter; compare:
+    # expect_that(partial(rnorm, 1, 2, 3), has_formals())
+
     if (is.primitive(match.fun(f))) {
         # None of what we do below works with primitives. Don’t try to be smart
         # with primitive functions, otherwise things stop working. For instance,
@@ -91,9 +94,17 @@ partial = function (f, ...) {
                 bquote(do.call(.Primitive(.(name)), c(list(...), .(fixed)))),
                 globalenv())
     } else {
-        f = match.fun(f)
-        formals = formals(f)
-        env = environment(f)
+        if (is.name(substitute(f)) && is.function(f)) {
+            # Might as well have a prettier rendering of the resulting function.
+            formals = formals(f)
+            env = environment(f)
+            f = substitute(f)
+        } else {
+            f = match.fun(f)
+            env = environment(f)
+            formals = formals(f)
+        }
+
 
         # If positional arguments were given, fill call from left to right,
         # after first argument.
