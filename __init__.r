@@ -97,9 +97,14 @@ partial = function (f, ...) {
         # If positional arguments were given, fill call from left to right,
         # after first argument.
         bound_names = names(fixed) %||% 2 : (1 + length(fixed))
-        formals[bound_names] = fixed
+        all_names = if (is.null(names(fixed))) seq_along(formals) else names(formals)
+        # This handles fixed arguments in `...` correctly!
+        formals = formals[setdiff(all_names, bound_names)]
 
-        closure(formals, body(f), parent.frame())
+        closure(formals,
+                bquote(do.call(.(f), c(as.list(match.call()[-1]), .(fixed)),
+                               envir = parent.frame())),
+                env)
     }
 }
 
