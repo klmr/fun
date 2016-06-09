@@ -109,7 +109,8 @@ complex anonymous functions.
 ```r
 strrev =
     p(strsplit, '') %|>%
-    p(lapply, p(paste, collapse = '') %.% rev) %|>%
+    p(lapply, rev) %|>%
+    p(lapply, p(paste, collapse = '')) %|>%
     unlist
 strrev(c('foo', 'bar'))
 ```
