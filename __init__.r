@@ -93,6 +93,7 @@ partial = function (f, ...) {
     } else {
         f = match.fun(f)
         formals = formals(f)
+        env = environment(f)
 
         # If positional arguments were given, fill call from left to right,
         # after first argument.
