@@ -36,7 +36,7 @@ test_that('Non-standard evaluation works', {
 })
 
 test_that('function is defined in correct environment', {
-    expect_that(environment(p(rnorm, 1)), is(environment(rnorm)))
+    expect_that(environment(p(rnorm, 1)), is_identical_to(environment(rnorm)))
     # TODO: test that non-exported objects can be accessed.
 })
 
