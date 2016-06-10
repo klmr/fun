@@ -1,18 +1,27 @@
-test_that('normal functions work', {
-    expect_that(p(rnorm), has_formals(n = , mean = 0, sd = 1))
-    expect_that(p(rnorm, mean = 5), has_formals(n = , sd = 1))
+test_that('partial positional arguments work', {
     expect_that(p(rnorm, 5), has_formals(n = , sd = 1))
-    expect_that(p(rnorm, sd = 2), has_formals(n = , mean = 0))
     expect_that(p(rnorm, 1, 2), has_formals(n = ))
     expect_that(p(rnorm, 1, 2, 3), has_formals())
-    expect_that(p(rnorm, mean = 1, 2), throws_error('missing names'))
 })
 
-test_that('primitive functions work', {
+test_that('partial named arguments work', {
+    expect_that(p(rnorm), has_formals(n = , mean = 0, sd = 1))
+    expect_that(p(rnorm, mean = 5), has_formals(n = , sd = 1))
+    expect_that(p(rnorm, sd = 2), has_formals(n = , mean = 0))
+    expect_that(p(rnorm, mean = 1, 2), throws_error('named and unnamed arguments'))
+})
+
+test_that('primitive functions work with positional arguments', {
     expect_that(p(`-`, 1)(10), equals(9))
     expect_that(p(`-`, 1)(1 : 3), equals(c(0, 1, 2)))
+})
+
+test_that('primitive functions work with named arguments', {
     expect_that(p(sum, na.rm = TRUE)(1, 2, NA), equals(3))
     expect_that(p(sum, na.rm = TRUE)(c(1, 2, NA)), equals(3))
+})
+
+test_that('primitive functions work with mixed arguments', {
     expect_that(p(sum, 1, na.rm = TRUE)(2, NA), equals(3))
 })
 
