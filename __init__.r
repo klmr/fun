@@ -102,10 +102,17 @@ partial = function (f, ...) {
             formals = formals(f)
         }
 
+        # Ensure that all arguments are either positional or named, because
+        # correctly handling a mix is painful.
+        names = names(fixed)
+        if (! is.null(names) && any(names == ''))
+            stop(paste0(dQuote('partial'), ' does not support mixing named and',
+                        ' unnamed arguments except for primitive functions'))
+
         # If positional arguments were given, fill call from left to right,
         # after first argument.
-        bound_names = names(fixed) %||% 2 : (1 + length(fixed))
-        all_names = if (is.null(names(fixed))) seq_along(formals) else names(formals)
+        bound_names = names %||% 2 : (1 + length(fixed))
+        all_names = if (is.null(names)) seq_along(formals) else names(formals)
         # This handles fixed arguments in `...` correctly!
         formals = formals[setdiff(all_names, bound_names)]
 
