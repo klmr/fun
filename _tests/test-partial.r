@@ -1,7 +1,13 @@
 test_that('partial works with positional arguments', {
     expect_that(p(rnorm, 5), has_formals(n = , sd = 1))
     expect_that(p(rnorm, 1, 2), has_formals(n = ))
-    expect_that(p(rnorm, 1, 2, 3), has_formals())
+    # The following seems counter-intuitive, but fixed positional arguments are
+    # filled in *after* the first argument, and the resulting following call is
+    # in fact invalid.
+    # It’s not possible to test for this inside `partial` due to the existence
+    # of `...` arguments.
+    expect_that(p(rnorm, 1, 2, 3), has_formals(n = ))
+    expect_that(p(rnorm, 1, 2, 3)(1), throws_error('unused argument \\(3\\)'))
 })
 
 test_that('partial works with named arguments', {
