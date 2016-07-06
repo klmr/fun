@@ -48,7 +48,10 @@ test_that('Non-standard evaluation works', {
 
 test_that('function is defined in correct environment', {
     expect_that(environment(p(rnorm, 1)), is_identical_to(environment(rnorm)))
-    # TODO: test that non-exported objects can be accessed.
+    # Test that non-exported objects can be accessed:
+    # `.libPaths` accesses the un-exported `.lib.loc` inside its environment.
+    lib_loc = .libPaths()
+    expect_that(p(.libPaths, lib_loc)(), equals(lib_loc))
 })
 
 test_that('... works', {
