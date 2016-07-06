@@ -39,6 +39,10 @@ closure = function (formals, body, env)
 #' by their position, starting at the second; the first argument remains free.
 #' To bind to the first argument, use named arguments.
 #'
+#' @note Creating a partial function application with no fixed arguments is
+#' valid, and just yields the original function. Creating a partial function
+#' where all arguments are fixed is also valid, but may yield a partially
+#' applied function with misleading signature.
 #' @note \code{partial} applies the arguments in a different order to the
 #' (somewhat misnamed) \code{\link{functional::Curry}}. See \link{Examples} for
 #' a comparison.
