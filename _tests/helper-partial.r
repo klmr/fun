@@ -24,3 +24,13 @@ prints = function (expected) {
                'printed correctly')
     }
 }
+
+prints_some = function (expected) {
+    function (actual) {
+        printed = paste(capture.output(actual), collapse = '\n')
+        expect(grepl(expected, printed, perl = TRUE),
+               sprintf('does not print %s (got %s)',
+                       dQuote(expected), dQuote(printed)),
+               'printed correctly')
+    }
+}
