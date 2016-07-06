@@ -2,8 +2,8 @@ has_formals = function (...) {
     f_to_s = function (formals) {
         if (length(formals) == 0)
             return('')
-        values = sapply(formals, deparse, backtick = TRUE)
-        names = sapply(sapply(names(formals), as.name), as.character)
+        values = lapply(formals, deparse, backtick = TRUE)
+        names = lapply(sapply(names(formals), as.name), as.character)
         paste(mapply(paste, names, values, sep = ' = '), collapse = ', ')
     }
 
