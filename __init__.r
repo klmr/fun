@@ -82,6 +82,9 @@ partial = function (f, ...) {
     # approximates the original call as closely as possible.
     fixed = match.call(expand.dots = FALSE)$...
 
+    if (length(fixed) == 0)
+        return(f)
+
     if (is.primitive(match.fun(f))) {
         # None of what we do below works with primitives. Don’t try to be smart
         # with primitive functions, otherwise things stop working. For instance,
