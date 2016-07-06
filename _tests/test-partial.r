@@ -35,7 +35,11 @@ test_that('primitive functions work with mixed arguments', {
 test_that('S3 dispatch works', {
     pp = p(print, digits = 2)
     expect_that(pp(1.234), prints('[1] 1.2'))
-    # TODO: Ensure non-exported S3 methods are found.
+    # Un-exported method `stats:::print.lm`
+    plm = p(print, digits = 2)
+    model = lm(speed ~ dist, cars)
+    expect_that(plm(model), prints_some('\\(Intercept\\).*dist'))
+    expect_that(plm(model), prints_some('8\\.28\\s+0\\.17'))
 })
 
 test_that('Non-standard evaluation works', {
