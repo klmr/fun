@@ -55,7 +55,13 @@ test_that('function is defined in correct environment', {
 })
 
 test_that('... works', {
-    # TODO: Add test case for `...`
+    f = function (text, ...)
+        unname(unlist(read.table(text = text, stringsAsFactors = FALSE, ...)[1, ]))
+
+    expect_that(p(f, sep = ':')('1:2'), equals(c(1, 2)))
+    expect_that(p(f, text = '1/2')(sep = '/'), equals(c(1, 2)))
+    expect_that(p(f, text = '1 2')(), equals(c(1, 2)))
+    expect_that(p(f, text = '1 2')(sep = ','), equals('1 2'))
 })
 
 test_that('stack frame can be inspected', {
