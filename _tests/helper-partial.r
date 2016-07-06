@@ -17,7 +17,7 @@ has_formals = function (...) {
 
 prints = function (expected) {
     function (actual) {
-        printed = capture.output(actual)
+        printed = paste(capture.output(actual), collapse = '\n')
         expect(identical(printed, expected),
                sprintf('does not print %s (got %s)',
                        dQuote(expected), dQuote(printed)),
