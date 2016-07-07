@@ -62,6 +62,14 @@ test_that('... works', {
     expect_that(p(f, text = '1/2')(sep = '/'), equals(c(1, 2)))
     expect_that(p(f, text = '1 2')(), equals(c(1, 2)))
     expect_that(p(f, text = '1 2')(sep = ','), equals('1 2'))
+
+    # Test with `...` before named arguments.
+    sum1 = function (..., na.rm = FALSE) sum(..., na.rm = na.rm)
+
+    expect_that(p(sum1, na.rm = TRUE)(1, 2, NA), equals(3))
+    expect_that(p(sum1, na.rm = TRUE)(c(1, 2, NA)), equals(3))
+    expect_that(p(sum1, 1, 2, NA)(), equals(NA_real_))
+    expect_that(p(sum1, 1, 2, NA)(na.rm = TRUE), equals(3))
 })
 
 test_that('stack frame can be inspected', {
