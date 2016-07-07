@@ -39,6 +39,10 @@ closure = function (formals, body, env)
 #' by their position, starting at the second; the first argument remains free.
 #' To bind to the first argument, use named arguments.
 #'
+#' @note Creating a partial function application with no fixed arguments is
+#' valid, and just yields the original function. Creating a partial function
+#' where all arguments are fixed is also valid, but may yield a partially
+#' applied function with misleading signature.
 #' @note \code{partial} applies the arguments in a different order to the
 #' (somewhat misnamed) \code{\link{functional::Curry}}. See \link{Examples} for
 #' a comparison.
@@ -82,6 +86,9 @@ partial = function (f, ...) {
     # approximates the original call as closely as possible.
     fixed = match.call(expand.dots = FALSE)$...
 
+    if (length(fixed) == 0)
+        return(f)
+
     if (is.primitive(match.fun(f))) {
         # None of what we do below works with primitives. Don’t try to be smart
         # with primitive functions, otherwise things stop working. For instance,
@@ -91,15 +98,35 @@ partial = function (f, ...) {
                 bquote(do.call(.Primitive(.(name)), c(list(...), .(fixed)))),
                 globalenv())
     } else {
-        f = match.fun(f)
-        formals = formals(f)
+        if (is.name(substitute(f)) && is.function(f)) {
+            # Might as well have a prettier rendering of the resulting function.
+            formals = formals(f)
+            env = environment(f)
+            f = substitute(f)
+        } else {
+            f = match.fun(f)
+            env = environment(f)
+            formals = formals(f)
+        }
+
+        # Ensure that all arguments are either positional or named, because
+        # correctly handling a mix is painful.
+        names = names(fixed)
+        if (! is.null(names) && any(names == ''))
+            stop(paste0(dQuote('partial'), ' does not support mixing named and',
+                        ' unnamed arguments except for primitive functions'))
 
         # If positional arguments were given, fill call from left to right,
         # after first argument.
-        bound_names = names(fixed) %||% 2 : (1 + length(fixed))
-        formals[bound_names] = fixed
+        bound_names = names %||% 2 : (1 + length(fixed))
+        all_names = if (is.null(names)) seq_along(formals) else names(formals)
+        # This handles fixed arguments in `...` correctly!
+        formals = formals[setdiff(all_names, bound_names)]
 
-        closure(formals, body(f), parent.frame())
+        closure(formals,
+                bquote(do.call(.(f), c(as.list(match.call()[-1]), .(fixed)),
+                               envir = parent.frame())),
+                env)
     }
 }
 
