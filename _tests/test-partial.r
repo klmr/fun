@@ -72,6 +72,40 @@ test_that('... works', {
     expect_that(p(sum1, 1, 2, NA)(na.rm = TRUE), equals(3))
 })
 
+test_that('missing arguments work', {
+    f = function (x, y)
+        missing(x)
+
+    expect_that(p(f)(), equals(TRUE))
+    expect_that(p(f, TRUE)(1), equals(FALSE))
+    expect_that(p(f, x = TRUE)(), equals(FALSE))
+    expect_that(p(f, x = TRUE)(1), equals(FALSE))
+    expect_that(p(f, y = FALSE)(), equals(TRUE))
+    expect_that(p(f, y = FALSE)(TRUE), equals(FALSE))
+
+    # The following, commented-out test fails because non-positional fixed
+    # arguments simply fill the remaining arguments, from left to right, after
+    # the arguments given in the call. As a consequence, `TRUE` drops into the
+    # first argument, `x`. The only way to prevent this is to replace
+    # `match.call` inside `partial` with a version that contains all
+    # arguments, even unset ones. This will yield the expected call with the
+    # first argument always unset. Alas, R *still* does not consider this
+    # value “missing”. We therefore accept these (unwanted) semantics for now.
+    #
+    # expect_that(p(f, TRUE)(), equals(TRUE))
+    #
+    # Assert the opposite to catch any regressions changing this behaviour.
+    expect_that(p(f, TRUE)(), equals(FALSE))
+
+    g = function (a, b)
+        if (missing(a)) b + 1 else if (missing(b)) a + 1 else a + b
+
+    expect_that(p(g, b = 2)(5), equals(7))
+    expect_that(p(g, a = 2)(5), equals(7))
+    expect_that(p(g, 2)(5), equals(7))
+    expect_that(p(g)(2, 5), equals(7))
+})
+
 test_that('stack frame can be inspected', {
     .hidden = 1
     expect_that(p(ls, all.names = TRUE)(), equals(ls(all.names = TRUE)))
