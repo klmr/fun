@@ -95,7 +95,8 @@ partial = function (f, ...) {
         # consider named arguments with primitives, such as `na.rm` with `sum`.
         name = deparse(substitute(f))
         closure(alist(... = ),
-                bquote(do.call(.Primitive(.(name)), c(list(...), .(fixed)))),
+                bquote(base::do.call(.Primitive(.(name)),
+                                     base::c(base::list(...), .(fixed)))),
                 globalenv())
     } else {
         if (is.name(substitute(f)) && is.function(f)) {
