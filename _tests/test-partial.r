@@ -142,5 +142,5 @@ test_that('partials work even if the user overrides core functions', {
 test_that('stack frame can be inspected', {
     .hidden = 1
     expect_that(p(ls, all.names = TRUE)(), equals(ls(all.names = TRUE)))
-    # TODO: Ensure `missing`, `match.call` etc. work
+    # TODO: Ensure `match.call` etc. work
 })
