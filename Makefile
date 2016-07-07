@@ -9,9 +9,6 @@ test: ${module_files}
 README.md: README.rmd ${module_files}
 	Rscript -e 'knitr::knit("$<", "$@")'
 
-%.html: %.rmd
-	Rscript -e 'knitr::knit2html("$<")'
-
 .DEFAULT_GOAL := show-help
 
 # Inspired by <http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html>

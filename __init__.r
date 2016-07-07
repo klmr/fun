@@ -179,8 +179,11 @@ isFALSE = function (x)
 #' \code{\%|>\%}) are exactly identical. The only difference is the order of the
 #' arguments, which is reversed in \code{\%|>\%}. \code{\%|>\%} is thus the
 #' higher-order function counterpart to \code{\link{\%>\%}}.
-compose = function (g, f)
+compose = function (g, f) {
+    force(f)
+    force(g)
     function (...) g(f(...))
+}
 
 #' @rdname compose
 `%.%` = compose
