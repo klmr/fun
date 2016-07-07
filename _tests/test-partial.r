@@ -1,41 +1,55 @@
-test_that('partial works with positional arguments', {
+test_that('partials work with positional arguments', {
     expect_that(p(rnorm, 5), has_formals(n = , sd = 1))
     expect_that(p(rnorm, 1, 2), has_formals(n = ))
+})
+
+test_that('partials with all arguments fixed cannot take further arguments', {
     # The following seems counter-intuitive, but fixed positional arguments are
     # filled in *after* the first argument, and the resulting following call is
     # in fact invalid.
     # It’s not possible to test for this inside `partial` due to the existence
     # of `...` arguments.
+    expect_that(p(rnorm, n = 1, mean = 1, sd = 2), has_formals())
     expect_that(p(rnorm, 1, 2, 3), has_formals(n = ))
+    expect_that(p(rnorm, 1, 2, 3)(), throws_error(NA))
     expect_that(p(rnorm, 1, 2, 3)(1), throws_error('unused argument \\(3\\)'))
 })
 
-test_that('partial works with named arguments', {
+test_that('`partial` with no fixed arguments returns the original function', {
     expect_that(p(rnorm), has_formals(n = , mean = 0, sd = 1))
-    expect_that(p(rnorm, mean = 5), has_formals(n = , sd = 1))
-    expect_that(p(rnorm, sd = 2), has_formals(n = , mean = 0))
-    expect_that(p(rnorm, mean = 1, 2), throws_error('named and unnamed arguments'))
-    expect_that(p(rnorm, n = 1, mean = 1, sd = 2), has_formals())
+    expect_that(p(rnorm), is_identical_to(rnorm))
 })
 
-test_that('primitive functions work with positional arguments', {
+test_that('partials work with named arguments', {
+    expect_that(p(rnorm, mean = 5), has_formals(n = , sd = 1))
+    expect_that(p(rnorm, sd = 2), has_formals(n = , mean = 0))
+})
+
+test_that('you cannot mix named and unnamed arguments for partials of non-primitive functions', {
+    expect_that(p(rnorm, mean = 1, 2), throws_error('named and unnamed arguments'))
+})
+
+test_that('partials of primitive functions work with positional arguments', {
     expect_that(p(`-`, 1)(10), equals(9))
     expect_that(p(`-`, 1)(1 : 3), equals(c(0, 1, 2)))
 })
 
-test_that('primitive functions work with named arguments', {
+test_that('partials of primitive functions work with named arguments', {
     expect_that(p(sum, na.rm = TRUE)(1, 2, NA), equals(3))
     expect_that(p(sum, na.rm = TRUE)(c(1, 2, NA)), equals(3))
 })
 
-test_that('primitive functions work with mixed arguments', {
+test_that('partials of primitive functions work with mixed named and unnamed arguments', {
     expect_that(p(sum, 1, na.rm = TRUE)(2, NA), equals(3))
 })
 
-test_that('S3 dispatch works', {
+test_that('S3 dispatch works for partials', {
     pp = p(print, digits = 2)
     expect_that(pp(1.234), prints('[1] 1.2'))
-    # Un-exported method `stats:::print.lm`
+})
+
+test_that('Partials finds unexported S3 method', {
+    # Method `stats:::print.lm` is unexported
     plm = p(print, digits = 2)
     model = lm(speed ~ dist, cars)
     expect_that(plm(model), prints_some('\\(Intercept\\).*dist'))
@@ -46,15 +60,18 @@ test_that('Non-standard evaluation works', {
     # TODO: Add test cases for NSE
 })
 
-test_that('function is defined in correct environment', {
+test_that('partials are defined in correct environment', {
     expect_that(environment(p(rnorm, 1)), is_identical_to(environment(rnorm)))
+})
+
+test_that('partials can access unexported objects in their function’s environment', {
     # Test that non-exported objects can be accessed:
     # `.libPaths` accesses the un-exported `.lib.loc` inside its environment.
     lib_loc = .libPaths()
     expect_that(p(.libPaths, lib_loc)(), equals(lib_loc))
 })
 
-test_that('... works', {
+test_that('Arguments in `...` can be fixed in partials', {
     f = function (text, ...)
         unname(unlist(read.table(text = text, stringsAsFactors = FALSE, ...)[1, ]))
 
@@ -62,8 +79,9 @@ test_that('... works', {
     expect_that(p(f, text = '1/2')(sep = '/'), equals(c(1, 2)))
     expect_that(p(f, text = '1 2')(), equals(c(1, 2)))
     expect_that(p(f, text = '1 2')(sep = ','), equals('1 2'))
+})
 
-    # Test with `...` before named arguments.
+test_that('partials work with `...` coming before named arguments', {
     sum1 = function (..., na.rm = FALSE) sum(..., na.rm = na.rm)
 
     expect_that(p(sum1, na.rm = TRUE)(1, 2, NA), equals(3))
@@ -72,7 +90,7 @@ test_that('... works', {
     expect_that(p(sum1, 1, 2, NA)(na.rm = TRUE), equals(3))
 })
 
-test_that('missing arguments work', {
+test_that('partials correctly recognize missing arguments', {
     f = function (x, y)
         missing(x)
 
