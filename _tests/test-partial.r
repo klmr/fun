@@ -124,6 +124,21 @@ test_that('partials correctly recognize missing arguments', {
     expect_that(p(g)(2, 5), equals(7))
 })
 
+test_that('partials work even if the user overrides core functions', {
+    f = function (...) stop('Should not be called')
+    internal_functions = c('do.call', 'list', 'pairlist', 'as.list', 'c',
+                           'match.call', '[', 'parent.frame')
+
+    on.exit(rm(list = internal_functions, envir = globalenv()))
+
+    # Override functions both in current and in global environment.
+    lapply(internal_functions, assign, value = f)
+    lapply(internal_functions, assign, value = f, envir = globalenv())
+
+    test_that(p(sum, 1)(2), equals(3))
+    test_that(p(xor.hexmode, 1)(3), equals(2))
+})
+
 test_that('stack frame can be inspected', {
     .hidden = 1
     expect_that(p(ls, all.names = TRUE)(), equals(ls(all.names = TRUE)))
