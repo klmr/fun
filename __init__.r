@@ -144,8 +144,8 @@ if (! getOption('klmr.disable_shortcuts', FALSE))
 #' @details
 #' An object is considered “falsy” when it is either the single value
 #' \code{FALSE} or no value at all, i.e. \code{NULL} / a vector of length 0.
-isFALSE = function (x)
-    identical(`attributes<-`(x, NULL), FALSE) || length(x) == 0
+is_false = function (x)
+    identical(as.vector(x), FALSE) || length(x) == 0
 
 #' Fall back to an alternative value if none given
 #'
