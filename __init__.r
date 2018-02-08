@@ -136,7 +136,7 @@ if (! getOption('klmr.disable_shortcuts', FALSE))
 
 #' Test whether a value is “falsy”.
 #'
-#' \code{isFALSE(x)} tests whether \code{x} is a falsy value.
+#' \code{is_false(x)} tests whether \code{x} is a falsy value.
 #' @param x the object to be tested
 #' @return Returns either \code{TRUE} or \code{FALSE}, depending on whether
 #' \code{x} is falsy.
@@ -155,9 +155,9 @@ is_false = function (x)
 #' @param alternative an alternative value
 #' @return Returns \code{value}, unless it isn’t a value, or \code{FALSE}, in
 #' which case \code{alternative} is returned.
-#' @seealso isFALSE
+#' @seealso is_false
 `%||%` = function (value, alternative)
-    if(isFALSE(value)) alternative else value
+    if(is_false(value)) alternative else value
 
 # FIXME: Add vectorized variant `%|%`, and `%or%`, which also handles empty
 # strings and errors.
