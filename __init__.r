@@ -15,6 +15,7 @@
 #' # function (a)
 #' # a + 1
 #' # <environment: 0x7feec6390b8>
+#' @export
 closure = function (formals, body, env)
     eval(call('function', as.pairlist(formals), body), env)
 
@@ -80,6 +81,7 @@ closure = function (formals, body, env)
 #' partial(print, digits = 2)(1.234)
 #' # Explicitly specifying the generic method works:
 #' partial(print.default, digits = 2)(1.234)
+#' @export
 partial = function (f, ...) {
     # We capture arguments unevaluated. I am not entirely sure where this would
     # make a difference, but it’s the most conservative choice because it
@@ -131,9 +133,6 @@ partial = function (f, ...) {
     }
 }
 
-if (! getOption('klmr.disable_shortcuts', FALSE))
-    p = partial
-
 #' Test whether a value is “falsy”.
 #'
 #' \code{is_false(x)} tests whether \code{x} is a falsy value.
@@ -144,6 +143,7 @@ if (! getOption('klmr.disable_shortcuts', FALSE))
 #' @details
 #' An object is considered “falsy” when it is either the single value
 #' \code{FALSE} or no value at all, i.e. \code{NULL} / a vector of length 0.
+#' @export
 is_false = function (x)
     identical(as.vector(x), FALSE) || length(x) == 0
 
@@ -156,6 +156,7 @@ is_false = function (x)
 #' @return Returns \code{value}, unless it isn’t a value, or \code{FALSE}, in
 #' which case \code{alternative} is returned.
 #' @seealso is_false
+#' @export
 `%||%` = function (value, alternative)
     if(is_false(value)) alternative else value
 
@@ -180,6 +181,7 @@ is_false = function (x)
 #' \code{\%|>\%}) are exactly identical. The only difference is the order of the
 #' arguments, which is reversed in \code{\%|>\%}. \code{\%|>\%} is thus the
 #' higher-order function counterpart to \code{\link{\%>\%}}.
+#' @export
 compose = function (g, f) {
     force(f)
     force(g)
@@ -187,14 +189,17 @@ compose = function (g, f) {
 }
 
 #' @rdname compose
+#' @export
 `%.%` = compose
 
 #' @rdname compose
+#' @export
 `%|>%` = function (f, g) compose(g, f)
 
 #' Pipe operator like in F#, Bash …
 #' @seealso \code{\link{magrittr::\%>\%}}
-`%>%` = magrittr::`%>%`
+#' @export
+box::use(magrittr[`%>%`])
 
 #' Argument matching with defaults
 #'
@@ -224,9 +229,11 @@ compose = function (g, f) {
 #'
 #' paste_csv('a', 'test') # => "a,test"
 #' paste_csv('a', 'test', sep = ';') # => "a;test"
-match_call_defaults = function (call = match.call(sys.function(sys.parent()),
-                                                  sys.call(sys.parent())),
-                                .formals = formals(sys.function(sys.parent()))) {
+#' @export
+match_call_defaults = function (
+    call = match.call(sys.function(sys.parent()), sys.call(sys.parent())),
+    .formals = formals(sys.function(sys.parent()))
+) {
     .formals = .formals[names(.formals) != '...']
     missing = is.na(match(names(.formals), names(call)))
     missing_names = names(.formals)[missing]
@@ -248,10 +255,13 @@ match_call_defaults = function (call = match.call(sys.function(sys.parent()),
 #' f(1 + 2) # => f(x = 1 + 2)
 #' g(1 + 2) # => (function (x) substitute_call())(x = 3)
 #' @rdname match_call_defaults
-substitute_call = function (call = match_call_defaults(call = match.call(sys.function(sys.parent()),
-                                                                         sys.call(sys.parent())),
-                                                       .formals = formals(sys.function(sys.parent()))),
-                      envir = parent.frame()) {
+substitute_call = function (
+    call = match_call_defaults(
+        call = match.call(sys.function(sys.parent()), sys.call(sys.parent())),
+        .formals = formals(sys.function(sys.parent()))
+    ),
+    envir = parent.frame()
+) {
     call[] = lapply(call, eval, envir = envir)
     call
 }

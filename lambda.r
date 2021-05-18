@@ -1,4 +1,7 @@
-modules::import('.', 'closure')
+box::use(
+    .[closure],
+    stats[setNames]
+)
 
 #' Define a single-argument function
 #'
@@ -34,6 +37,7 @@ modules::import('.', 'closure')
 #' # [1] 2 4 6 8
 #' mapply(x ~ y -> x + y, 1 : 4, 5 : 8)
 #' # [1]  6  8 10 12
+#' @export
 `<-` = function (body, params) {
     vars = all.vars(substitute(params))
     formals = setNames(replicate(length(vars), quote(expr = )), vars)

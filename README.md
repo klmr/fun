@@ -4,7 +4,7 @@ This module provides a basic toolbox for working with functions in R.
 
 
 ```r
-fun = modules::import('klmr/functional')
+box::use(klmr/fun)
 ```
 
 ### Creating functions
@@ -48,6 +48,8 @@ Alternatively, use one of the function composition operators:
 
 
 ```r
+box::use(klmr/fun[...]) # Attach module to use operators.
+
 # Traditional order of arguments, same as `compose`:
 sd1 = sqrt %.% var
 sd1(CO2$uptake)
@@ -69,11 +71,11 @@ sd2(CO2$uptake)
 
 ### Function chaining
 
-As made popular by ‹magrittr› and ‹dplyr›:
+As made popular by ‘magrittr’ and ‘dplyr’:
 
 
 ```r
-CO2$uptake %>% var %>% sqrt
+CO2$uptake %>% var() %>% sqrt()
 ```
 
 ```
@@ -84,12 +86,12 @@ Note the similarity in usage between `%>%` and `%|>%`.
 
 ### Partial function application
 
-Partial function application via `partial` (or its shortcut `p`) creates a new
-function with fewer arguments.
+Partial function application via `partial` creates a new function with fewer
+arguments.
 
 
 ```r
-modules::import('klmr/functional', attach = 'p')
+box::use(klmr/fun[p = partial])
 ```
 
 
@@ -123,7 +125,7 @@ strrev(c('foo', 'bar'))
 
 
 ```r
-modules::import('klmr/functional/lambda')
+box::use(klmr/fun/lambda[...])
 
 sapply(1 : 4, x -> 2 * x)
 ```
